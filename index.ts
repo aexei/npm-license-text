@@ -19,7 +19,7 @@ const options: CrawlerOptions = {
 
 const dumpLicensesAsync = (opts: CrawlerOptions) => {
     return new Promise((resolve, reject) => {
-        dumpLicenses({ ...options, ...opts }, function(error, res) {
+        dumpLicenses({ ...options, ...opts }, function (error, res) {
             if (error) {
                 reject(error)
             } else {
@@ -34,6 +34,7 @@ async function writeNpmLicenseTxt(licenseJson: any, outputFile: string): Promise
     for (let p of Object.keys(licenseJson)) {
         let info = licenseJson[p]
         let license = await fetchLicense(p, info.licenses, info.licenseUrl, info.repository)
+        license = license.replace(/   +/g, '');
         await fs.write(o, `# ${p}\n\n${license}\n\n`)
     }
     await fs.close(o)
