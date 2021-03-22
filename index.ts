@@ -1,11 +1,33 @@
 #!/usr/bin/env node
 
-const crawler = require('npm-license-crawler')
-const thenify = require('thenify')
-import * as got from 'got'
 import * as fs from 'mz/fs'
 
+import { CrawlerOptions, dumpLicenses } from 'npm-license-crawler'
+
+import got from 'got'
+
 let failures = 0
+
+const options: CrawlerOptions = {
+    start: ['./node_modules'],
+    json: 'licenses.json',
+    unknown: false,
+    production: true,
+    omitVersion: false,
+    dependencies: true,
+}
+
+const dumpLicensesAsync = (opts: CrawlerOptions) => {
+    return new Promise((resolve, reject) => {
+        dumpLicenses({ ...options, ...opts }, function(error, res) {
+            if (error) {
+                reject(error)
+            } else {
+                resolve(res)
+            }
+        })
+    })
+}
 
 async function writeNpmLicenseTxt(licenseJson: any, outputFile: string): Promise<void> {
     let o = await fs.open(outputFile, 'w')
@@ -115,9 +137,8 @@ async function run(): Promise<void> {
 
     const [, , inputDir, outputFile] = process.argv
     console.error(`Generating licenses for npm packages under ${inputDir}`)
-    const dumpLicenses = thenify(crawler.dumpLicenses)
 
-    let licenseJson = await dumpLicenses({
+    let licenseJson = await dumpLicensesAsync({
         start: inputDir,
     })
 
