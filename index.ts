@@ -30,14 +30,24 @@ const dumpLicensesAsync = (opts: CrawlerOptions) => {
 }
 
 async function writeNpmLicenseTxt(licenseJson: any, outputFile: string): Promise<void> {
-    let o = await fs.open(outputFile, 'w')
+    const data: { [key: string]: string } = {}
     for (let p of Object.keys(licenseJson)) {
         let info = licenseJson[p]
         let license = await fetchLicense(p, info.licenses, info.licenseUrl, info.repository)
-        license = license.replace(/   +/g, '');
-        await fs.write(o, `# ${p}\n\n${license}\n\n`)
+        license = license.replace(/   +/g, '')
+        data[p] = license
     }
-    await fs.close(o)
+    const out = JSON.stringify(data)
+    await fs.writeFile(outputFile, out)
+
+    // let o = await fs.open(outputFile, 'w')
+    // for (let p of Object.keys(licenseJson)) {
+    //     let info = licenseJson[p]
+    //     let license = await fetchLicense(p, info.licenses, info.licenseUrl, info.repository)
+    //     license = license.replace(/   +/g, '')
+    //     await fs.write(o, `# ${p}\n\n${license}\n\n`)
+    // }
+    // await fs.close(o)
 }
 
 const overrides = new Map<string, string>([
