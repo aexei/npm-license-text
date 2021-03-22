@@ -31,11 +31,11 @@ const dumpLicensesAsync = (opts: CrawlerOptions) => {
 
 async function writeNpmLicenseTxt(licenseJson: any, outputFile: string): Promise<void> {
     const data: { [key: string]: string } = {}
-    for (let p of Object.keys(licenseJson)) {
+    for (let p of Object.keys(licenseJson).filter((a) => a.length > 1)) {
         let info = licenseJson[p]
         let license = await fetchLicense(p, info.licenses, info.licenseUrl, info.repository)
         license = license.replace(/   +/g, '')
-        data[p] = license
+        data[p.substring(0, p.lastIndexOf('@'))] = license
     }
     const out = JSON.stringify(data)
     await fs.writeFile(outputFile, out)
